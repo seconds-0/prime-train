@@ -3,35 +3,16 @@ Core validation logic for prime-rl configs.
 """
 
 from dataclasses import dataclass, field
-from enum import Enum
 from pathlib import Path
 from typing import Any
 
 import tomli
 from rich.console import Console
 
-from prime_train.validator.gotchas import GOTCHA_DATABASE, check_gotchas
+from prime_train.validator.types import Severity, ValidationResult
 from prime_train.validator.schema import validate_schema
 from prime_train.validator.model import check_model_compatibility
 from prime_train.validator.memory import estimate_memory_requirements
-
-
-class Severity(Enum):
-    """Severity level for validation results."""
-    ERROR = "error"
-    WARNING = "warning"
-    INFO = "info"
-    SUCCESS = "success"
-
-
-@dataclass
-class ValidationResult:
-    """A single validation check result."""
-    check: str
-    severity: Severity
-    message: str
-    details: str | None = None
-    fix: str | None = None
 
 
 @dataclass
@@ -132,7 +113,8 @@ def validate_config(config_path: Path) -> ValidationResults:
         for r in memory_results:
             results.add(r)
 
-    # 6. Known gotchas
+    # 6. Known gotchas (lazy import to avoid circular dependency)
+    from prime_train.validator.gotchas import check_gotchas
     gotcha_results = check_gotchas(config)
     for r in gotcha_results:
         results.add(r)

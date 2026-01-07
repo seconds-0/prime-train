@@ -23,6 +23,7 @@ app = typer.Typer(
     name="prime-train",
     help="Production-grade training harness for prime-rl",
     no_args_is_help=True,
+    invoke_without_command=True,
 )
 
 console = Console()
@@ -310,14 +311,19 @@ def backup_status() -> None:
     console.print(status)
 
 
-@app.callback()
+@app.callback(invoke_without_command=True)
 def main(
+    ctx: typer.Context,
     version: bool = typer.Option(False, "--version", "-v", help="Show version"),
 ) -> None:
     """prime-train: Production-grade training harness for prime-rl."""
     if version:
         from prime_train import __version__
         console.print(f"prime-train {__version__}")
+        raise typer.Exit()
+    elif ctx.invoked_subcommand is None:
+        # Show help if no command and no flags
+        console.print(ctx.get_help())
         raise typer.Exit()
 
 

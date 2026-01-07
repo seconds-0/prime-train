@@ -12,7 +12,7 @@ our mistakes.
 from dataclasses import dataclass
 from typing import Any, Callable
 
-from prime_train.validator.core import ValidationResult, Severity
+from prime_train.validator.types import ValidationResult, Severity
 
 
 @dataclass
@@ -114,10 +114,9 @@ def _detect_prime_executor_latency(config: dict[str, Any]) -> bool:
     env = config.get("orchestrator", {}).get("env", {})
     executor = env.get("executor_backend", "").lower()
 
-    # Only relevant for tool-calling environments
-    has_tools = "tool" in str(config).lower() or "function" in str(config).lower()
-
-    return executor == "prime" and has_tools
+    # Warn about prime executor - it adds ~1.5s latency per tool call
+    # which can be a significant bottleneck in tool-calling tasks
+    return executor == "prime"
 
 
 def _detect_checkpointing_disabled(config: dict[str, Any]) -> bool:

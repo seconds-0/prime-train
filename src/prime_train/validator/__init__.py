@@ -8,9 +8,9 @@ This module validates configs before training to catch common issues:
 - Known gotchas (FSDP+LoRA conflict, seq_len mismatches, etc.)
 """
 
+from prime_train.validator.types import ValidationResult, Severity
 from prime_train.validator.core import (
     validate_config,
-    ValidationResult,
     ValidationResults,
     format_results,
 )
@@ -21,6 +21,7 @@ __all__ = [
     "validate_config",
     "ValidationResult",
     "ValidationResults",
+    "Severity",
     "format_results",
     "GOTCHA_DATABASE",
     "Gotcha",
