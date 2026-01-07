@@ -1,0 +1,21 @@
+# Example: Config that triggers FSDP+LoRA gotcha
+# This should fail validation with ERROR
+
+[orchestrator]
+seq_len = 8192
+lora_name = "default"
+
+[orchestrator.sampling]
+max_tokens = 4096
+
+[trainer.model]
+name_or_path = "Qwen/Qwen3-8B"
+seq_len = 8192
+fsdp_cpu_offload = true  # BAD: Uses 1.65x MORE memory with LoRA!
+
+[trainer.model.lora]
+r = 16
+alpha = 32
+
+[inference.model]
+name_or_path = "Qwen/Qwen3-8B"

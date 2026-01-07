@@ -1,0 +1,41 @@
+# Example: Basic prime-rl config for LoRA training
+# This config passes all validation checks
+
+[config]
+version = "v1"
+created = "2026-01-06"
+notes = "Example config for Qwen3-8B on 2x H100"
+
+[orchestrator]
+seq_len = 8192
+batch_size = 128
+rollouts_per_example = 8
+lora_name = "default"
+
+[orchestrator.sampling]
+max_tokens = 4096
+temperature = 0.7
+
+[orchestrator.env]
+executor_backend = "local"  # Recommended for tool-calling
+
+[trainer.model]
+name_or_path = "Qwen/Qwen3-8B"
+seq_len = 8192
+dtype = "bf16"
+
+[trainer.model.lora]
+r = 16
+alpha = 32
+target_modules = ["q_proj", "v_proj", "k_proj", "o_proj"]
+
+[trainer.optimizer]
+type = "adamw"
+lr = 1e-5
+
+[inference.model]
+name_or_path = "Qwen/Qwen3-8B"
+dtype = "bf16"
+
+[inference]
+gpu_memory_utilization = 0.90

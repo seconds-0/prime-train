@@ -1,0 +1,18 @@
+# Example: Config that triggers prime executor latency warning
+# This should show a WARNING about latency bottleneck
+
+[orchestrator]
+seq_len = 8192
+
+[orchestrator.sampling]
+max_tokens = 4096
+
+[orchestrator.env]
+executor_backend = "prime"  # WARNING: ~1.5s latency per tool call
+
+[trainer.model]
+name_or_path = "Qwen/Qwen3-8B"
+seq_len = 8192
+
+[inference.model]
+name_or_path = "Qwen/Qwen3-8B"
