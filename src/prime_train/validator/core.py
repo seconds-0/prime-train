@@ -42,7 +42,10 @@ class ValidationResults:
         self.add(ValidationResult(check=check, severity=Severity.ERROR, message=message, details=details, fix=fix))
 
 
-def validate_config(config_path: Path) -> ValidationResults:
+def validate_config(
+    config_path: Path,
+    checkpoint_dir: Path | str | None = None,
+) -> ValidationResults:
     """
     Validate a prime-rl training config.
 
@@ -52,9 +55,11 @@ def validate_config(config_path: Path) -> ValidationResults:
     3. Model compatibility (HuggingFace, vLLM, not VL)
     4. Memory estimation (fits on target hardware)
     5. Known gotchas (FSDP+LoRA, etc.)
+    6. Disk budget for checkpoints
 
     Args:
         config_path: Path to the config.toml file
+        checkpoint_dir: Directory where checkpoints will be stored (for disk budget check)
 
     Returns:
         ValidationResults with all check results
@@ -118,6 +123,13 @@ def validate_config(config_path: Path) -> ValidationResults:
     gotcha_results = check_gotchas(config)
     for r in gotcha_results:
         results.add(r)
+
+    # 7. Disk budget for checkpoints
+    if checkpoint_dir is not None:
+        from prime_train.resilience.checkpoint_budget import validate_checkpoint_budget
+        disk_results = validate_checkpoint_budget(config, checkpoint_dir)
+        for r in disk_results:
+            results.add(r)
 
     return results
 

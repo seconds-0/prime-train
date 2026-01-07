@@ -40,6 +40,12 @@ app.add_typer(backup_app, name="backup")
 def validate(
     config_path: Path = typer.Argument(..., help="Path to config.toml"),
     strict: bool = typer.Option(False, "--strict", "-s", help="Fail on warnings"),
+    checkpoint_dir: Optional[Path] = typer.Option(
+        None,
+        "--checkpoint-dir",
+        "-d",
+        help="Checkpoint directory for disk budget validation (default: /opt/run/checkpoints/)",
+    ),
 ) -> None:
     """
     Pre-flight validation of training configs.
@@ -50,15 +56,20 @@ def validate(
     - Config schema is valid
     - Memory requirements fit hardware
     - Known gotchas (FSDP+LoRA, deprecated sections, etc.)
+    - Disk budget for checkpoints (if --checkpoint-dir specified)
 
     Example:
         prime-train validate config.toml
+        prime-train validate config.toml --checkpoint-dir /opt/run/checkpoints/
     """
     from prime_train.validator import validate_config, format_results
 
     console.print(f"[bold]Validating[/bold] {config_path}")
 
-    results = validate_config(config_path)
+    # Default to /opt/run/checkpoints/ if not specified but check disk
+    ckpt_dir = checkpoint_dir if checkpoint_dir else Path("/opt/run/checkpoints/")
+
+    results = validate_config(config_path, checkpoint_dir=ckpt_dir)
     format_results(results, console)
 
     if results.has_errors or (strict and results.has_warnings):
